@@ -52,8 +52,6 @@ void del(std::multimap<std::string, std::string>&map)
            cout("There are two or more items with this name. Please enter a number: ");
            std::string phone;
            getline(std::cin, phone);
-           std::cout<<phone<<std::endl;
-
            for(auto it=range.first; it!=range.second; ++it)
            {
                if(it->second==phone)
