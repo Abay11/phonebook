@@ -51,9 +51,8 @@ void del(std::multimap<std::string, std::string>&map)
         {
            cout("There are two or more items with this name. Please enter a number: ");
            std::string phone;
-           std::cin.ignore();
            getline(std::cin, phone);
-
+           std::cout<<phone<<std::endl;
 
            for(auto it=range.first; it!=range.second; ++it)
            {
@@ -62,13 +61,18 @@ void del(std::multimap<std::string, std::string>&map)
                    pos=it;
                    break;
                }
+               else if(it==std::prev(range.second))
+                  goto not_found;
            }
         }
         map.erase(pos);
         cout("Operation status: OK");
     }
     else
+    {
+        not_found:
         cout("Operation status: Not found");
+    }
     coutenter();
     getchar();
 }
