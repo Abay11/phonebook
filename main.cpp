@@ -23,7 +23,6 @@ void add(std::multimap<std::string, std::string>&map)
    std::string name, phone;
 
    std::cout<<"Enter name: ";
-   std::cin.ignore();
    getline(std::cin, name);
 
    std::cout<<"Enter phone: ";
@@ -38,12 +37,12 @@ void add(std::multimap<std::string, std::string>&map)
 void del(std::multimap<std::string, std::string>&map)
 {
     system("clear");
+
     std::string name;
     cout("Enter name: ");
-    std::cin.ignore();
     getline(std::cin, name);
-    auto pos=map.find(name);
 
+    auto pos=map.find(name);
     if(pos!=map.end())
     {
         auto range=map.equal_range(name);
@@ -84,16 +83,15 @@ void print(std::multimap<std::string, std::string>&map)
         std::cout<<iter.first<<"\t\t"<<iter.second<<std::endl;
     }
     coutenter();
-    std::cin.ignore();
-    std::cin.ignore();
+    getchar();
 }
 
 void search(std::multimap<std::string, std::string>&map)
 {
     system("clear");
+
     std::string name;
     cout("Enter name: ");
-    std::cin.ignore();
     getline(std::cin, name);
     auto range=map.equal_range(name);
 
@@ -127,6 +125,7 @@ int main()
     cout("Enter command: ");
 
     input=static_cast<char>(getchar());
+    std::cin.ignore();
 
     switch(input)
     {
