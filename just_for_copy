@@ -8,134 +8,132 @@ using namespace std;
 
 std::string process(const std::string& line, float threshhold)
 {
-		string result;
+	string result;
 
-		auto npos = line.find("dFps=");
-		if(npos != string::npos)
-				{
-						try
-								{
-										float dfps = stof(line.substr(npos + 4 + 1));
+	auto npos = line.find("dFps=");
+	if (npos != string::npos)
+	{
+		try
+		{
+			float dfps = stof(line.substr(npos + 4 + 1));
 
-										if(dfps < threshhold)
-												{
-														result = line;
-												}
-								}
-						catch (invalid_argument e)
-								{
-										result = "can't parse: " + line;
-								}
+			if (dfps < threshhold)
+			{
+				result = line;
+			}
+		}
+		catch (invalid_argument e)
+		{
+			result = "can't parse: " + line;
+		}
 
-				}
+	}
 
 
-		return result;
+	return result;
 }
 
 std::string process_too_big_diff(const std::string& line, float threshhold)
 {
-		string result;
+	string result;
 
-		static map<string, float> values;
-		static map<string, string> previous_lines;
+	static map<string, float> values;
+	static map<string, string> previous_lines;
 
-		auto npos = line.find("dFps=");
-		if(npos != string::npos)
+	auto npos = line.find("dFps=");
+	if (npos != string::npos)
+	{
+		try
+		{
+			float dfps = stof(line.substr(npos + 4 + 1));
+
+			auto key_begin = line.find("[addr ");
+			auto key_end = line.find("[vs 0.");
+			if (key_begin == string::npos || key_end == string::npos)
+				throw invalid_argument("");
+
+			auto key = line.substr(key_begin, key_end + 8 - key_begin);
+	
+		
+
+			if (values.find(key) == values.end())
+			{
+				values.insert({ key, dfps });
+			}
+			else
+			{
+						
+				if (fabs(dfps - values[key]) > threshhold)
 				{
-						try
-								{
-										float dfps = stof(line.substr(npos + 4 + 1));
+					auto it = previous_lines.find(key);
+					if (it != previous_lines.end())
+					{
+						result += it->second + "\n";
+					}
 
-										auto key_begin = line.find("[addr ");
-										auto key_end = line.find("[vs 0.");
-										if(key_begin == string::npos ||  key_end == string::npos)
-												throw invalid_argument("");
-
-										auto key = line.substr(key_begin, key_end + 8 - key_begin);
-
-										if(values.find(key) == values.end())
-												{
-														values.insert({key, dfps});
-												}
-										else
-												{
-
-														if(abs(dfps - values[key]) > threshhold)
-																{
-																		auto it = previous_lines.find(key);
-																		if(it != previous_lines.end())
-																				{
-																						result += it->second + "\n";
-																				}
-
-																		result += line + "\n\n";
-																}
-												}
-
-										previous_lines[key] = line;
-
-								}
-						catch (invalid_argument e)
-								{
-										result = "can't parse: " + line;
-								}
+					result += line + "\n\n";
 
 				}
+			}
+			values[key] = dfps;
+			previous_lines[key] = line;
+
+		}
+		catch (invalid_argument e)
+		{
+			result = "can't parse: " + line;
+		}
+
+	}
 
 
-		return result;
+	return result;
 }
 
 int main()
 {
-		cout << "Start..." << endl;
+	cout << "Start..." << endl;
+
+	try
+	{
+		fstream ifs("input.txt");
+		ofstream ofs("too_low_dfps.txt");
+		ofstream too_big_diff_fs("too_big_diff.txt");
+
+		float threshhold;
+		float max_diff_threshhold;
+
+		cout << "Input lower allowed fps: ";
+		cin >> threshhold;
+		cin.ignore();
+		cout << "Input max diff: ";
+		cin >> max_diff_threshhold;
+
+		std::string line;
+		while (getline(ifs, line))
+		{
+			auto res = process(line, threshhold);
+			if (!res.empty())
+			{
+				ofs << res << "\n";
+			}
+
+			auto too_big_res = process_too_big_diff(line, max_diff_threshhold);
+			if (!too_big_res.empty())
+			{
+				too_big_diff_fs << too_big_res << "\n";
+			}
+		}
+	}
+	catch (exception e)
+	{
+		cout << "Error: " << e.what();
+		return -1;
+	}
+
+	cout << "End. Elapsed: " << endl;
 
 
-		cout << (abs(25.571524f- 25.601639f) > 2.0f) << endl;
-
-		return 0;
-
-		try
-				{
-						fstream ifs("input.txt");
-						ofstream ofs("too_low_dfps.txt");
-						ofstream too_big_diff_fs("too_big_diff.txt");
-
-						float threshhold;
-						float max_diff_threshhold;
-
-						cout << "Input lower allowed fps: ";
-						cin >> threshhold;
-						cin.ignore();
-						cout << "Input max diff: ";
-						cin >> max_diff_threshhold;
-
-						std::string line;
-						while(getline(ifs, line))
-								{
-										auto res = process(line, threshhold);
-										if(!res.empty())
-												{
-														ofs << res << "\n";
-												}
-
-										auto too_big_res = process_too_big_diff(line, max_diff_threshhold);
-										if(!too_big_res.empty())
-												{
-														too_big_diff_fs << too_big_res << "\n";
-												}
-								}
-				}
-		catch (exception e)
-				{
-						cout << "Error: " << e.what();
-						return -1;
-				}
-
-		cout << "End. Elapsed: " << endl;
-
-
-		return 0;
+	return 0;
 }
 
